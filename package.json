@@ -1,0 +1,6 @@
+{
+  "name": "lotto-qr",
+  "private": true,
+  "scripts": { "build": "node scripts/icons.js" },
+  "devDependencies": { "@resvg/resvg-js": "2.6.2" }
+}

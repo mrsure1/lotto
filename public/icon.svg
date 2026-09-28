@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="gy" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#FFE27A"/><stop offset=".55" stop-color="#FBC400"/><stop offset="1" stop-color="#D99A00"/></radialGradient>
+    <radialGradient id="gb" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#B8E8FF"/><stop offset=".55" stop-color="#4FB6EC"/><stop offset="1" stop-color="#2787C4"/></radialGradient>
+    <radialGradient id="gr" cx=".35" cy=".3" r=".75"><stop offset="0" stop-color="#FFB3AE"/><stop offset=".55" stop-color="#F2554E"/><stop offset="1" stop-color="#C62D26"/></radialGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#000" flood-opacity=".35"/></filter>
+  </defs>
+  <rect width="512" height="512" fill="#1B2750"/>
+  <!-- 스캐너 모서리 -->
+  <g fill="none" stroke="#FFFFFF" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".95">
+    <path d="M112 170 V132 Q112 112 132 112 H170"/>
+    <path d="M342 112 H380 Q400 112 400 132 V170"/>
+    <path d="M112 342 V380 Q112 400 132 400 H170"/>
+    <path d="M400 342 V380 Q400 400 380 400 H342"/>
+  </g>
+  <!-- 로또 공 -->
+  <g filter="url(#sh)">
+    <circle cx="206" cy="214" r="64" fill="url(#gy)"/>
+    <circle cx="306" cy="214" r="64" fill="url(#gb)"/>
+    <circle cx="256" cy="302" r="64" fill="url(#gr)"/>
+  </g>
+  <g>
+    <circle cx="206" cy="214" r="30" fill="#fff" opacity=".92"/>
+    <circle cx="306" cy="214" r="30" fill="#fff" opacity=".92"/>
+    <circle cx="256" cy="302" r="30" fill="#fff" opacity=".92"/>
+    <path fill="#B07A00" d="M195.9 200.8H215.7V204.6L205.4 227H198.8L208.5 205.7H195.9Z"/>
+    <path fill="#1E6FA3" d="M285.2 222.3H291.1V205.4L285 206.6V202L291.1 200.8H297.5V222.3H303.5V227H285.2Z M318.5 215.3Q316.6 215.3 315.6 216.3Q314.6 217.3 314.6 219.3Q314.6 221.2 315.6 222.2Q316.6 223.3 318.5 223.3Q320.4 223.3 321.4 222.2Q322.4 221.2 322.4 219.3Q322.4 217.3 321.4 216.3Q320.4 215.3 318.5 215.3ZM313.6 213Q311.2 212.3 310 210.8Q308.8 209.3 308.8 207.1Q308.8 203.8 311.3 202Q313.7 200.3 318.5 200.3Q323.3 200.3 325.8 202Q328.3 203.7 328.3 207.1Q328.3 209.3 327 210.8Q325.8 212.3 323.4 213Q326.1 213.8 327.5 215.4Q328.8 217.1 328.8 219.6Q328.8 223.5 326.2 225.5Q323.6 227.5 318.5 227.5Q313.4 227.5 310.8 225.5Q308.2 223.5 308.2 219.6Q308.2 217.1 309.6 215.4Q310.9 213.8 313.6 213ZM315.2 207.8Q315.2 209.3 316 210.2Q316.9 211 318.5 211Q320.1 211 321 210.2Q321.8 209.3 321.8 207.8Q321.8 206.2 321 205.4Q320.1 204.5 318.5 204.5Q316.9 204.5 316 205.4Q315.2 206.2 315.2 207.8Z"/>
+    <path fill="#A82520" d="M241.3 310H252.9V315H233.8V310L243.4 301.6Q244.7 300.4 245.3 299.3Q245.9 298.2 245.9 297Q245.9 295.2 244.7 294Q243.4 292.9 241.4 292.9Q239.8 292.9 237.9 293.6Q236 294.3 233.9 295.6V289.8Q236.2 289.1 238.4 288.7Q240.6 288.3 242.8 288.3Q247.5 288.3 250.1 290.4Q252.7 292.4 252.7 296.1Q252.7 298.3 251.6 300.1Q250.5 302 246.9 305.1Z M269.3 294.3 261.8 305.3H269.3ZM268.1 288.8H275.7V305.3H279.4V310.2H275.7V315H269.3V310.2H257.6V304.4Z"/>
+  </g>
+</svg>

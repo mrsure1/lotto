@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>로또 QR 결과</title>
+<meta name="theme-color" content="#16213E">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="로또QR">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --paper:#F2F4F8; --card:#FFFFFF; --ink:#16213E; --muted:#6B7488; --line:#DCE1EA;
+  --red:#D7261E; --win-bg:#FFF1EF;
+  --b1:#FBC400; --b2:#69C8F2; --b3:#FF7272; --b4:#A8A8A8; --b5:#B0D840;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --paper:#0F1522; --card:#182033; --ink:#E8ECF4; --muted:#98A2B8; --line:#2A3450; --win-bg:#3A1C1C; }
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;background:var(--paper);color:var(--ink)}
+body{font-family:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  font-feature-settings:"tnum";-webkit-font-smoothing:antialiased;line-height:1.5}
+.wrap{max-width:480px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;align-items:center;justify-content:space-between;padding:4px 2px 14px}
+header h1{font-size:18px;font-weight:800;margin:0;letter-spacing:-.02em}
+header .sub{font-size:13px;color:var(--muted)}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--b2);outline-offset:2px}
+
+/* 스캐너 */
+.scanner{position:relative;aspect-ratio:1/1;border-radius:20px;overflow:hidden;background:#0A0F1A}
+.scanner video{width:100%;height:100%;object-fit:cover;display:block}
+.frame{position:absolute;inset:18%;pointer-events:none}
+.frame i{position:absolute;width:34px;height:34px;border:4px solid #fff}
+.frame i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-top-left-radius:10px}
+.frame i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-top-right-radius:10px}
+.frame i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-bottom-left-radius:10px}
+.frame i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-bottom-right-radius:10px}
+.scan-msg{position:absolute;left:0;right:0;bottom:14px;text-align:center;color:#fff;font-size:14px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:#fff;background:#16213E}
+.start button{background:#fff;color:#16213E;font-weight:700;font-size:17px;padding:14px 26px}
+.start p{margin:0;font-size:14px;opacity:.85;text-align:center;padding:0 24px;line-height:1.55}
+.start p b{color:#FBC400}
+.alt{display:flex;gap:8px;margin-top:10px}
+.alt label{flex:1;text-align:center;background:var(--card);color:var(--ink);border:1px solid var(--line);padding:12px;font-size:14px;font-weight:600;border-radius:12px;cursor:pointer}
+
+/* 결과 */
+#result{display:none}
+#result.on{display:block}
+.ticket{background:var(--card);border-radius:18px;padding:18px 16px 16px;position:relative}
+.ticket + .ticket{margin-top:14px}
+.round{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.round b{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.round span{font-size:13px;color:var(--muted)}
+.balls{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:nowrap}
+.ball{width:38px;height:38px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.25);flex:none}
+.plus{color:var(--muted);font-weight:700;margin:0 2px}
+.verdict{margin-top:16px;padding-top:14px;border-top:2px dashed var(--line);display:flex;justify-content:space-between;align-items:flex-end}
+.verdict .label{font-size:14px;color:var(--muted)}
+.verdict .amt{font-size:30px;font-weight:900;letter-spacing:-.03em;line-height:1.1}
+.verdict .amt.win{color:var(--red)}
+
+.games{list-style:none;margin:0;padding:0}
+.game{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.game:last-child{border-bottom:0}
+.game .key{font-weight:800;color:var(--muted);font-size:15px}
+.game .nums{display:flex;gap:4px}
+.game .ball{width:31px;height:31px;font-size:13px}
+.ball.miss{background:transparent!important;color:var(--muted);text-shadow:none;box-shadow:inset 0 0 0 1.5px var(--line)}
+.ball.bonus-hit{box-shadow:0 0 0 2px var(--card),0 0 0 4px var(--red)}
+.game .res{text-align:right;font-size:13px;min-width:62px}
+.game .res b{display:block;font-size:15px}
+.game.won .res b{color:var(--red)}
+.game .res small{color:var(--muted)}
+
+h2{font-size:15px;margin:0 0 8px;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{font-size:12px;color:var(--muted);font-weight:600;text-align:right;padding:4px 0 8px}
+th:first-child{text-align:left}
+td{padding:11px 0;border-top:1px solid var(--line);text-align:right;vertical-align:top}
+td:first-child{text-align:left;white-space:nowrap}
+td .rule{display:block;font-size:11.5px;color:var(--muted);font-weight:400}
+td.money{font-weight:800;font-size:15px}
+tr.mine td{background:var(--win-bg)}
+tr.mine td:first-child{box-shadow:inset 4px 0 0 var(--red);padding-left:10px}
+.rk{font-weight:800}
+.note{font-size:12px;color:var(--muted);margin:10px 0 0}
+.again{display:block;width:100%;margin-top:16px;background:var(--ink);color:var(--paper);font-weight:800;font-size:17px;padding:16px}
+.status{background:var(--card);border-radius:18px;padding:22px 16px;text-align:center}
+.status b{display:block;font-size:18px;margin-bottom:6px}
+.status p{margin:0;color:var(--muted);font-size:14px}
+.err{color:var(--red)}
+.spinner{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--ink);border-radius:50%;margin:0 auto 10px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spinner{animation-duration:2.5s}}
+@media (max-width:360px){.game .ball{width:27px;height:27px;font-size:12px}.ball{width:34px;height:34px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>로또 QR 결과</h1>
+    <span class="sub">로또 6/45</span>
+  </header>
+
+  <section id="scan">
+    <div class="scanner">
+      <video id="video" playsinline muted></video>
+      <div class="frame"><i></i><i></i><i></i><i></i></div>
+      <div class="scan-msg" id="scanMsg">복권의 QR코드를 네모 안에 맞춰 주세요</div>
+      <div class="start" id="startBox">
+        <button id="startBtn">카메라로 QR 스캔</button>
+        <p id="startHint">처음 한 번은 카메라 사용 허용을 묻는 창이 뜹니다. <b>허용</b>을 눌러 주세요.</p>
+      </div>
+    </div>
+    <div class="alt">
+      <label for="file">카메라가 안 되면 사진으로 확인</label>
+    </div>
+    <input id="file" type="file" accept="image/*" hidden>
+  </section>
+
+  <section id="result" aria-live="polite"></section>
+</div>
+<canvas id="canvas" hidden></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+const $ = s => document.querySelector(s);
+const video = $('#video'), canvas = $('#canvas'), ctx = canvas.getContext('2d', { willReadFrequently: true });
+let stream = null, scanning = false, detector = null;
+if ('BarcodeDetector' in window) { try { detector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) {} }
+
+const RULES = { 1: '6개 일치', 2: '5개 + 보너스', 3: '5개 일치', 4: '4개 일치', 5: '3개 일치' };
+const won = n => n.toLocaleString('ko-KR') + '원';
+function ballColor(n){ return n<=10?'var(--b1)':n<=20?'var(--b2)':n<=30?'var(--b3)':n<=40?'var(--b4)':'var(--b5)'; }
+function ball(n, cls=''){ return `<span class="ball ${cls}" style="background:${ballColor(n)}">${n}</span>`; }
+function fmtDate(s){ const [y,m,d] = s.split('-').map(Number); return `${y}년 ${m}월 ${d}일`; }
+
+/* QR 문자열 해석: v=회차(4자리) + [구분자 1글자 + 번호 12자리] 반복 + 일련번호 */
+function parseTicket(text){
+  let v = null;
+  try { v = new URL(text.trim()).searchParams.get('v'); } catch (e) {}
+  if (!v) { const m = text.match(/[?&]v=([0-9a-z]+)/i); v = m ? m[1] : null; }
+  if (!v && /^\d{4}[a-z]\d{12}/i.test(text.trim())) v = text.trim();
+  if (!v) return null;
+  const round = parseInt(v.slice(0, 4), 10);
+  const games = [];
+  const re = /[a-z](\d{12})/gi; let m;
+  const body = v.slice(4);
+  while ((m = re.exec(body)) && games.length < 5) {
+    const nums = m[1].match(/\d\d/g).map(Number);
+    if (nums.every(n => n >= 1 && n <= 45) && new Set(nums).size === 6) games.push(nums);
+  }
+  if (!round || !games.length) return null;
+  return { round, games };
+}
+
+function rankOf(nums, draw){
+  const hit = nums.filter(n => draw.numbers.includes(n)).length;
+  const bonus = nums.includes(draw.bonus);
+  if (hit === 6) return 1;
+  if (hit === 5 && bonus) return 2;
+  if (hit === 5) return 3;
+  if (hit === 4) return 4;
+  if (hit === 3) return 5;
+  return 0;
+}
+
+/* 카메라 */
+function openStream(simple){
+  const video = simple ? { facingMode: 'environment' }
+    : { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 1280 } };
+  return navigator.mediaDevices.getUserMedia({ video, audio: false });
+}
+async function startCamera(){
+  $('#startBox').style.display = 'none';
+  $('#scanMsg').textContent = '카메라를 켜는 중입니다';
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return cameraFail('unsupported');
+  let lastErr = null;
+  // 첫 권한 허용 직후나 일시적 오류로 실패하는 경우가 있어 조건을 바꿔 최대 3번 시도
+  for (const [simple, wait] of [[false, 0], [true, 400], [true, 1200]]) {
+    if (wait) await new Promise(r => setTimeout(r, wait));
+    try {
+      stream = await openStream(simple);
+      video.srcObject = stream;
+      await video.play();
+      scanning = true;
+      $('#scanMsg').textContent = '복권의 QR코드를 네모 안에 맞춰 주세요';
+      try { localStorage.setItem('camOk', '1'); } catch (e) {}
+      requestAnimationFrame(tick);
+      return;
+    } catch (e) {
+      lastErr = e;
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+      if (e && e.name === 'NotAllowedError' && !simple) continue; // 권한 창 직후 한 번 더
+      if (e && e.name === 'NotAllowedError' && wait >= 1200) break;
+    }
+  }
+  cameraFail(lastErr && lastErr.name);
+}
+function cameraFail(name){
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  let msg;
+  if (name === 'NotAllowedError' || name === 'SecurityError') {
+    msg = ios
+      ? '카메라 사용이 허용되지 않았습니다. 아래 버튼을 다시 누르고 <b>허용</b>을 선택하세요. 계속 안 되면 설정 앱 → Safari → 카메라를 <b>허용</b>으로 바꿔 주세요.'
+      : '카메라 사용이 허용되지 않았습니다. 아래 버튼을 다시 누르고 <b>허용</b>을 선택하세요. 계속 안 되면 주소창 왼쪽 아이콘 → 권한 → 카메라를 <b>허용</b>으로 바꿔 주세요.';
+  } else if (name === 'NotReadableError' || name === 'AbortError') {
+    msg = '다른 앱이 카메라를 쓰고 있습니다. 다른 카메라 앱을 닫고 다시 눌러 주세요.';
+  } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+    msg = '사용할 수 있는 카메라를 찾지 못했습니다. 아래 "사진으로 확인"을 이용하세요.';
+  } else {
+    msg = '카메라를 켜지 못했습니다. 아래 버튼을 다시 눌러 주세요.';
+  }
+  $('#startBtn').textContent = '다시 시도';
+  $('#startHint').innerHTML = msg;
+  $('#startBox').style.display = 'flex';
+}
+function stopCamera(){
+  scanning = false;
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+let busy = false;
+async function tick(){
+  if (!scanning) return;
+  if (!busy && video.readyState >= 2) {
+    busy = true;
+    try {
+      const text = await decodeFrom(video, video.videoWidth, video.videoHeight);
+      if (text) { onCode(text); busy = false; return; }
+    } catch (e) {}
+    busy = false;
+  }
+  requestAnimationFrame(tick);
+}
+async function decodeFrom(src, w, h){
+  if (detector) {
+    const r = await detector.detect(src);
+    if (r.length) return r[0].rawValue;
+  }
+  if (typeof jsQR !== 'function' || !w) return null;
+  const scale = Math.min(1, 800 / Math.max(w, h));
+  canvas.width = Math.round(w * scale); canvas.height = Math.round(h * scale);
+  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
+  const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'attemptBoth' });
+  return code ? code.data : null;
+}
+
+function onCode(text){
+  const t = parseTicket(text);
+  if (!t) {
+    $('#scanMsg').textContent = '로또 6/45 QR코드가 아닙니다. 다시 비춰 주세요';
+    if (scanning) setTimeout(() => requestAnimationFrame(tick), 1200);
+    return;
+  }
+  stopCamera();
+  if (navigator.vibrate) navigator.vibrate(60);
+  show(t);
+}
+
+/* 결과 표시 */
+async function show(ticket){
+  $('#scan').style.display = 'none';
+  const box = $('#result'); box.classList.add('on');
+  box.innerHTML = `<div class="status"><div class="spinner"></div><b>${ticket.round}회 결과 확인 중</b><p>동행복권 당첨 정보를 불러오고 있습니다.</p></div>`;
+  window.scrollTo(0, 0);
+  let data;
+  try {
+    const r = await fetch('/api/draw?no=' + ticket.round);
+    data = await r.json();
+    if (!data.ok) throw new Error(data.error || '조회 실패');
+  } catch (e) {
+    box.innerHTML = `<div class="status"><b class="err">결과를 불러오지 못했습니다</b><p>${e.message}</p></div>
+      <button class="again" onclick="retry()">다시 시도</button><button class="again" style="background:var(--muted)" onclick="reset()">다시 스캔</button>`;
+    window._last = ticket; return;
+  }
+  if (data.status !== 'done') {
+    const msg = data.status === 'pending'
+      ? `${fmtDate(data.drawDate)} 토요일 저녁에 추첨합니다.`
+      : '추첨은 끝났고 당첨금 집계가 진행 중입니다. 잠시 후 다시 확인해 주세요.';
+    box.innerHTML = `<div class="ticket"><div class="round"><b>${ticket.round}회</b><span>${data.status === 'pending' ? '추첨 전' : '집계 중'}</span></div><p class="note" style="font-size:14px">${msg}</p></div>
+      <div class="ticket"><h2>내 번호</h2><ul class="games">${ticket.games.map((g,i)=>`<li class="game"><span class="key">${'ABCDE'[i]}</span><span class="nums">${g.map(n=>ball(n)).join('')}</span><span class="res"></span></li>`).join('')}</ul></div>
+      <button class="again" onclick="reset()">다시 스캔</button>`;
+    return;
+  }
+  render(ticket, data.draw);
+}
+
+function render(ticket, d){
+  const prize = Object.fromEntries(d.ranks.map(r => [r.rank, r.amount]));
+  const results = ticket.games.map(g => rankOf(g, d));
+  const total = results.reduce((s, r) => s + (r ? prize[r] : 0), 0);
+  const myRanks = new Set(results.filter(Boolean));
+
+  const gamesHtml = ticket.games.map((g, i) => {
+    const r = results[i];
+    const nums = g.map(n => {
+      if (d.numbers.includes(n)) return ball(n);
+      if (n === d.bonus && r === 2) return ball(n, 'bonus-hit');
+      return ball(n, 'miss');
+    }).join('');
+    const res = r ? `<b>${r}등</b><small>${won(prize[r])}</small>` : `<b style="color:var(--muted)">낙첨</b>`;
+    return `<li class="game ${r ? 'won' : ''}"><span class="key">${'ABCDE'[i]}</span><span class="nums">${nums}</span><span class="res">${res}</span></li>`;
+  }).join('');
+
+  const rows = d.ranks.map(r => `<tr class="${myRanks.has(r.rank) ? 'mine' : ''}">
+      <td><span class="rk">${r.rank}등</span><span class="rule">${RULES[r.rank]}</span></td>
+      <td class="money">${won(r.amount)}</td>
+      <td>${r.winners.toLocaleString('ko-KR')}명</td></tr>`).join('');
+
+  const f = d.firstByType;
+  const firstNote = f && (f.auto || f.manual || f.semi)
+    ? `1등 당첨 방식: 자동 ${f.auto}, 수동 ${f.manual}, 반자동 ${f.semi}. ` : '';
+
+  $('#result').innerHTML = `
+    <div class="ticket">
+      <div class="round"><b>${d.round}회</b><span>${fmtDate(d.date)} 추첨</span></div>
+      <div class="balls">${d.numbers.map(n => ball(n)).join('')}<span class="plus">+</span>${ball(d.bonus)}</div>
+      <div class="verdict">
+        <span class="label">내 당첨금 합계</span>
+        <span class="amt ${total ? 'win' : ''}">${total ? won(total) : '낙첨'}</span>
+      </div>
+    </div>
+    <div class="ticket"><h2>내 번호</h2><ul class="games">${gamesHtml}</ul></div>
+    <div class="ticket">
+      <h2>등수별 당첨금</h2>
+      <table><thead><tr><th>등수</th><th>1게임당 당첨금</th><th>당첨자</th></tr></thead><tbody>${rows}</tbody></table>
+      <p class="note">${firstNote}당첨금은 세전 금액입니다. 200만 원 초과분은 22%, 3억 원 초과분은 33%가 원천징수됩니다. 지급기한은 지급개시일로부터 1년입니다.</p>
+    </div>
+    <button class="again" onclick="reset()">다른 복권 스캔</button>`;
+}
+
+function reset(){
+  $('#result').classList.remove('on'); $('#result').innerHTML = '';
+  $('#scan').style.display = 'block';
+  history.replaceState(null, '', '/');
+  startCamera();
+}
+function retry(){ if (window._last) show(window._last); }
+
+$('#startBtn').onclick = startCamera;
+$('#file').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(); img.src = URL.createObjectURL(f);
+  await img.decode();
+  const text = await decodeFrom(img, img.naturalWidth, img.naturalHeight);
+  e.target.value = '';
+  if (text) onCode(text); else alert('사진에서 QR코드를 찾지 못했습니다. QR이 크고 선명하게 나오도록 다시 찍어 주세요.');
+};
+
+/* 이 페이지 주소에 ?v=... 가 붙어 열리면 바로 결과 표시 */
+const initial = location.search.includes('v=') ? parseTicket(location.href) : null;
+if (initial) show(initial);
+else if ((() => { try { return localStorage.getItem('camOk'); } catch (e) { return null; } })()) { $('#startHint').textContent = '버튼을 누르면 카메라가 켜집니다.'; }
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+</script>
+</body>
+</html>
